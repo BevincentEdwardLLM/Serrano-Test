@@ -444,58 +444,72 @@ function ReentryCarePlanUI() {
     }
   };
 
-  // Fetch candidate profiles when candidate name changes (only for Reentry Care Plan)
-  useEffect(() => {
-    const fetchCandidates = async () => {
-      if (STEPS[activeStep] !== "Reentry Care Plan" || !candidateName.trim()) {
-        setCandidateProfiles([]);
-        setSelectedProfile("");
-        return;
+  // FIX: Modify the useEffect to only fetch candidates if there is a name
+// New useEffect hook - START
+useEffect(() => {
+  const fetchCandidates = async (nameToFetch) => {
+    // 1. Guard check for the correct step
+    if (STEPS[activeStep] !== "Reentry Care Plan") {
+      setCandidateProfiles([]);
+      setSelectedProfile("");
+      return;
+    }
+
+    // 2. Clear error/success messages on new fetch attempt
+    setError("");
+    setSuccess("");
+    setDocumentUrl(null);
+    setDocumentName(null);
+
+    // 3. Prevent fetching on an empty string (unless the component's state is empty)
+    // We fetch if the step is correct and the candidate name state is not empty.
+    if (!nameToFetch.trim()) {
+       setCandidateProfiles([]);
+       setSelectedProfile("");
+       return;
+    }
+
+
+    try {
+      setLoadingProfiles(true);
+      
+      const response = await fetch("http://localhost:5000/get_candidates_by_name", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ candidate_name: nameToFetch }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: `Server error: ${response.status}` }));
+        throw new Error(errorData.error || `Server error: ${response.status}`);
       }
 
-      try {
-        setLoadingProfiles(true);
-        setError("");
-        
-        const response = await fetch("http://localhost:5000/get_candidates_by_name", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ candidate_name: candidateName }),
-        });
+      const data = await response.json();
+      const profiles = data.candidates || [];
+      setCandidateProfiles(profiles);
+      setSelectedProfile(""); // Always reset selected profile when new profiles arrive
 
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ error: `Server error: ${response.status}` }));
-          throw new Error(errorData.error || `Server error: ${response.status}`);
-        }
+    } catch (err) {
+      console.error("Error fetching candidates:", err);
+      // Backend returned error or network failed
+      setError(`Failed to fetch candidate profiles: ${err.message}. Please check your server and network.`);
+      setCandidateProfiles([]);
+      setSelectedProfile("");
+    } finally {
+      setLoadingProfiles(false);
+    }
+  };
 
-        const data = await response.json();
-        const profiles = data.candidates || [];
-        setCandidateProfiles(profiles);
-        
-        // FIX: Remove auto-selection here to allow manual choice.
-        // if (profiles.length > 0) {
-        //   setSelectedProfile(profiles[0].medical_id);
-        //   setCandidateName(profiles[0].display_text);
-        // } else {
-        //   setSelectedProfile("");
-        // }
-        
-        // New logic: Only reset selectedProfile when new profiles are fetched
-        setSelectedProfile("");
+  // Immediate check/fetch on mount or dependency change (activeStep, candidateName)
+  // We use a timeout for debouncing to prevent excessive API calls while typing.
+  const timeoutId = setTimeout(() => {
+    fetchCandidates(candidateName);
+  }, 500);
 
-      } catch (err) {
-        console.error("Error fetching candidates:", err);
-        setError(`Failed to fetch candidate profiles: ${err.message}`);
-        setCandidateProfiles([]);
-        setSelectedProfile("");
-      } finally {
-        setLoadingProfiles(false);
-      }
-    };
+  return () => clearTimeout(timeoutId);
 
-    const timeoutId = setTimeout(fetchCandidates, 500);
-    return () => clearTimeout(timeoutId);
-  }, [candidateName, activeStep]);
+}, [candidateName, activeStep]);
+// New useEffect hook - END
 
   async function generate(reportType) {
     setError("");

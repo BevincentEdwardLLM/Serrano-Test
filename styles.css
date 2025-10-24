@@ -1,0 +1,60 @@
+/* --- Medium Border Visibility (Balanced Approach) --- */
+
+/* Standard border thickness */
+#root .border { 
+  border-width: 1px !important; 
+}
+
+/* Medium contrast gray borders - visible but not harsh */
+#root .border-gray-100 {
+  --tw-border-opacity: 0.7;
+  border-color: rgb(209 213 219 / var(--tw-border-opacity)) !important; /* medium gray-300 */
+}
+#root .border-gray-200 {
+  --tw-border-opacity: 0.8;
+  border-color: rgb(209 213 219 / var(--tw-border-opacity)) !important; /* medium gray-300 */
+}
+#root .border-gray-300 {
+  --tw-border-opacity: 0.9;
+  border-color: rgb(156 163 175 / var(--tw-border-opacity)) !important; /* medium gray-400 */
+}
+
+/* Make main cards clearly defined but not overwhelming */
+#root .rounded-2xl.border.border-gray-200 {
+  --tw-border-opacity: 0.6;
+  border-color: rgb(156 163 175 / var(--tw-border-opacity)) !important; /* gray-400 with transparency */
+  border-width: 1px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important; /* medium subtle shadow */
+}
+
+/* Nice hover effect for cards */
+#root .rounded-2xl.border.border-gray-200:hover {
+  --tw-border-opacity: 0.8;
+  border-color: rgb(156 163 175 / var(--tw-border-opacity)) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* Input fields should be clearly visible */
+#root .rounded-xl.border.border-gray-300 {
+  --tw-border-opacity: 0.7;
+  border-color: rgb(156 163 175 / var(--tw-border-opacity)) !important; /* gray-400 */
+  border-width: 1px !important;
+}
+
+/* Balanced focus states */
+#root .focus-within\:ring-2:focus-within {
+  --tw-ring-color: rgb(16 185 129) !important; /* emerald-500 */
+  --tw-ring-opacity: 0.2 !important; /* medium ring visibility */
+  border-color: rgb(16 185 129 / 0.7) !important; /* semi-transparent border */
+}
+
+/* Medium visibility horizontal rule */
+#root hr { 
+  border-width: 1px !important; 
+  border-color: rgb(209 213 219 / 0.6) !important; /* medium gray-300 */
+}
+
+/* Keep background clean */
+#root .rounded-2xl.border.border-gray-200.bg-white {
+  background-color: rgb(255 255 255) !important;
+}
